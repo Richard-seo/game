@@ -6,26 +6,26 @@
   <title>DUAL FRONT - Zombie Survival</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { 
-      height: 100%; 
-      background: #0a0e1a; 
-      overflow: hidden; 
+    html, body {
+      height: 100%;
+      background: #0a0e1a;
+      overflow: hidden;
       touch-action: none;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-    
-    canvas { 
-      display: block; 
-      width: 100vw; 
-      height: 100vh; 
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
       background: linear-gradient(180deg, #0a0e1a 0%, #1a1e2a 100%);
     }
 
     /* 터치 컨트롤 영역 */
     .controls {
       position: fixed;
-      left: 0; 
-      right: 0; 
+      left: 0;
+      right: 0;
       bottom: 0;
       height: 20vh;
       min-height: 120px;
@@ -37,7 +37,7 @@
       pointer-events: none;
       z-index: 100;
     }
-    
+
     .btn {
       pointer-events: auto;
       border-radius: 12px;
@@ -54,9 +54,9 @@
       touch-action: none;
       transition: all 0.1s ease;
     }
-    
-    .btn:active { 
-      background: rgba(255,255,255,0.15); 
+
+    .btn:active {
+      background: rgba(255,255,255,0.15);
       border-color: rgba(255,255,255,0.25);
       transform: scale(0.98);
     }
@@ -64,8 +64,8 @@
     /* 상단 HUD */
     .hud {
       position: fixed;
-      top: 12px; 
-      left: 12px; 
+      top: 12px;
+      left: 12px;
       right: 12px;
       display: flex;
       justify-content: space-between;
@@ -79,7 +79,7 @@
       display: flex;
       align-items: stretch;
     }
-    
+
     .stat {
       background: rgba(0,0,0,0.6);
       backdrop-filter: blur(10px);
@@ -94,14 +94,14 @@
       gap: 2px;
       min-width: 70px;
     }
-    
+
     .stat-label {
       font-size: 10px;
       opacity: 0.6;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    
+
     .stat-value {
       font-size: 16px;
       font-weight: 700;
@@ -136,7 +136,7 @@
       opacity: 1;
       transition: opacity 0.3s ease;
     }
-    
+
     .loading.hide {
       opacity: 0;
       pointer-events: none;
@@ -254,912 +254,909 @@
   </style>
 </head>
 <body>
-  <div class="loading" id="loading">DUAL FRONT</div>
+<div class="loading" id="loading">DUAL FRONT</div>
 
-  <canvas id="canvas"></canvas>
+<canvas id="canvas"></canvas>
 
-  <div class="hud">
-    <div class="stat">
-      <div class="stat-label">HP</div>
-      <div class="stat-value" id="hp">100</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">People</div>
-      <div class="stat-value" id="people">1</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Level</div>
-      <div class="stat-value" id="level">1</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Score</div>
-      <div class="stat-value" id="score">0</div>
-    </div>
-    <div class="hud-actions">
-      <button class="rank-btn" id="rankBtn">Ranking</button>
+<div class="hud">
+  <div class="stat">
+    <div class="stat-label">HP</div>
+    <div class="stat-value" id="hp">100</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">People</div>
+    <div class="stat-value" id="people">1</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Level</div>
+    <div class="stat-value" id="level">1</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Score</div>
+    <div class="stat-value" id="score">0</div>
+  </div>
+</div>
+
+<div class="guide">
+  ◀ 왼쪽 30%: 사람 모으기 | 오른쪽 70%: 좀비 처치 ▶ (방향키 또는 A/D 키)
+</div>
+
+<div class="controls">
+  <div class="btn" id="btnLeft">◀ LEFT</div>
+  <div class="btn" id="btnRight">RIGHT ▶</div>
+</div>
+
+<div class="modal" id="idModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-title">플레이어 ID 입력</div>
+    <div class="modal-desc">랭킹은 ID 기준으로 저장됩니다.</div>
+    <div class="modal-row">
+      <input class="modal-input" id="playerIdInput" maxlength="12" placeholder="예: player01" />
+      <button class="modal-btn" id="startBtn">Start</button>
     </div>
   </div>
+</div>
 
-  <div class="guide">
-    ◀ 왼쪽 30%: 사람 모으기 | 오른쪽 70%: 좀비 처치 ▶ (방향키 또는 A/D 키)
-  </div>
-
-  <div class="controls">
-    <div class="btn" id="btnLeft">◀ LEFT</div>
-    <div class="btn" id="btnRight">RIGHT ▶</div>
-  </div>
-
-  <div class="modal" id="idModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-title">플레이어 ID 입력</div>
-      <div class="modal-desc">랭킹은 ID 기준으로 저장됩니다.</div>
-      <div class="modal-row">
-        <input class="modal-input" id="playerIdInput" maxlength="12" placeholder="예: player01" />
-        <button class="modal-btn" id="startBtn">Start</button>
-      </div>
+<div class="modal" id="rankingModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-title">랭킹</div>
+    <div class="modal-desc" id="rankingDesc">상위 10명의 기록입니다.</div>
+    <ol class="ranking-list" id="rankingList"></ol>
+    <div class="modal-row" style="justify-content: flex-end; margin-top: 12px;">
+      <button class="modal-btn" id="closeRankingBtn">닫기</button>
     </div>
   </div>
-
-  <div class="modal" id="rankingModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-title">랭킹</div>
-      <div class="modal-desc" id="rankingDesc">상위 10명의 기록입니다.</div>
-      <ol class="ranking-list" id="rankingList"></ol>
-      <div class="modal-row" style="justify-content: flex-end; margin-top: 12px;">
-        <button class="modal-btn" id="closeRankingBtn">닫기</button>
-      </div>
-    </div>
-  </div>
+</div>
 
 <script>
-(function() {
-  'use strict';
+  (function() {
+    'use strict';
 
-  // ========== Canvas Setup ==========
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const loading = document.getElementById('loading');
-  const idModal = document.getElementById('idModal');
-  const playerIdInput = document.getElementById('playerIdInput');
-  const startBtn = document.getElementById('startBtn');
-  const rankBtn = document.getElementById('rankBtn');
-  const rankingModal = document.getElementById('rankingModal');
-  const rankingList = document.getElementById('rankingList');
-  const rankingDesc = document.getElementById('rankingDesc');
-  const closeRankingBtn = document.getElementById('closeRankingBtn');
+    // ========== Canvas Setup ==========
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const loading = document.getElementById('loading');
+    const idModal = document.getElementById('idModal');
+    const playerIdInput = document.getElementById('playerIdInput');
+    const startBtn = document.getElementById('startBtn');
+    const rankBtn = document.getElementById('rankBtn');
+    const rankingModal = document.getElementById('rankingModal');
+    const rankingList = document.getElementById('rankingList');
+    const rankingDesc = document.getElementById('rankingDesc');
+    const closeRankingBtn = document.getElementById('closeRankingBtn');
 
-  function resizeCanvas() {
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    ctx.scale(dpr, dpr);
-  }
-
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  // ========== Game Constants ==========
-  const W = () => window.innerWidth;
-  const H = () => window.innerHeight;
-  const LANE_LEFT_X = () => W() * 0.15;   // 왼쪽 레인 중심 (30% 영역)
-  const LANE_RIGHT_X = () => W() * 0.65;  // 오른쪽 레인 중심 (70% 영역)
-  const LANE_DIVIDER = () => W() * 0.3;   // 경계선
-  const MID_X = () => W() * 0.3;          // 왼쪽/오른쪽 구분 기준
-  const PLAYER_Y = () => H() - Math.max(100, H() * 0.18) - 20;
-  const RANKING_KEY = 'dualfront_ranking_v1';
-  const LAST_ID_KEY = 'dualfront_last_id_v1';
-
-  function loadRanking() {
-    try {
-      const raw = localStorage.getItem(RANKING_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (err) {
-      return [];
+    function resizeCanvas() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
     }
-  }
 
-  function saveRanking(list) {
-    localStorage.setItem(RANKING_KEY, JSON.stringify(list));
-  }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-  function upsertRanking(entry) {
-    const list = loadRanking();
-    const idx = list.findIndex(item => item.id === entry.id);
-    if (idx >= 0) {
-      if (entry.score > list[idx].score) {
-        list[idx] = entry;
+    // ========== Game Constants ==========
+    const W = () => window.innerWidth;
+    const H = () => window.innerHeight;
+    const LANE_LEFT_X = () => W() * 0.15;   // 왼쪽 레인 중심 (30% 영역)
+    const LANE_RIGHT_X = () => W() * 0.65;  // 오른쪽 레인 중심 (70% 영역)
+    const LANE_DIVIDER = () => W() * 0.3;   // 경계선
+    const MID_X = () => W() * 0.3;          // 왼쪽/오른쪽 구분 기준
+    const PLAYER_Y = () => H() - Math.max(100, H() * 0.18) - 20;
+    const RANKING_KEY = 'dualfront_ranking_v1';
+    const LAST_ID_KEY = 'dualfront_last_id_v1';
+
+    function loadRanking() {
+      try {
+        const raw = localStorage.getItem(RANKING_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (err) {
+        return [];
       }
-    } else {
-      list.push(entry);
-    }
-    list.sort((a, b) => b.score - a.score);
-    saveRanking(list);
-    return list;
-  }
-
-  function renderRanking(list, highlightId) {
-    rankingList.innerHTML = '';
-    if (!list.length) {
-      rankingList.innerHTML = '<li class="ranking-item">기록이 없습니다.</li>';
-      return;
     }
 
-    list.slice(0, 10).forEach((item, index) => {
-      const li = document.createElement('li');
-      li.className = 'ranking-item';
-      const rank = `#${index + 1}`;
-      const label = highlightId && item.id === highlightId ? ' • 내 기록' : '';
-      li.innerHTML = `
+    function saveRanking(list) {
+      localStorage.setItem(RANKING_KEY, JSON.stringify(list));
+    }
+
+    function upsertRanking(entry) {
+      const list = loadRanking();
+      const idx = list.findIndex(item => item.id === entry.id);
+      if (idx >= 0) {
+        if (entry.score > list[idx].score) {
+          list[idx] = entry;
+        }
+      } else {
+        list.push(entry);
+      }
+      list.sort((a, b) => b.score - a.score);
+      saveRanking(list);
+      return list;
+    }
+
+    function renderRanking(list, highlightId) {
+      rankingList.innerHTML = '';
+      if (!list.length) {
+        rankingList.innerHTML = '<li class="ranking-item">기록이 없습니다.</li>';
+        return;
+      }
+
+      list.slice(0, 10).forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'ranking-item';
+        const rank = `#${index + 1}`;
+        const label = highlightId && item.id === highlightId ? ' • 내 기록' : '';
+        li.innerHTML = `
         <span>${rank} <span class="ranking-id">${item.id}</span>${label}</span>
         <span>Score ${item.score} • ${item.time}s</span>
       `;
-      rankingList.appendChild(li);
-    });
-  }
-
-  // ========== Character Drawing Functions ==========
-  
-  // 플레이어 캐릭터 그리기 (사람 형태)
-  function drawPlayer(x, y, radius, glowIntensity = 0) {
-    const headRadius = radius * 0.4;
-    const bodyHeight = radius * 1.2;
-    
-    // Glow effect
-    if (glowIntensity > 0) {
-      const glowSize = radius + glowIntensity;
-      const gradient = ctx.createRadialGradient(x, y, radius, x, y, glowSize);
-      gradient.addColorStop(0, 'rgba(100, 180, 255, 0)');
-      gradient.addColorStop(1, 'rgba(100, 180, 255, 0.2)');
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, glowSize, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    
-    // 머리
-    ctx.beginPath();
-    ctx.arc(x, y - bodyHeight * 0.3, headRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFD4A3';
-    ctx.fill();
-    ctx.strokeStyle = '#CC8866';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    
-    // 눈
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(x - headRadius * 0.3, y - bodyHeight * 0.35, headRadius * 0.15, 0, Math.PI * 2);
-    ctx.arc(x + headRadius * 0.3, y - bodyHeight * 0.35, headRadius * 0.15, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // 몸통
-    ctx.beginPath();
-    ctx.fillStyle = '#4A9EFF';
-    ctx.fillRect(x - radius * 0.4, y - bodyHeight * 0.15, radius * 0.8, bodyHeight * 0.6);
-    ctx.strokeStyle = '#2E7FD9';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x - radius * 0.4, y - bodyHeight * 0.15, radius * 0.8, bodyHeight * 0.6);
-    
-    // 팔
-    ctx.strokeStyle = '#4A9EFF';
-    ctx.lineWidth = radius * 0.2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x - radius * 0.4, y - bodyHeight * 0.1);
-    ctx.lineTo(x - radius * 0.7, y + bodyHeight * 0.1);
-    ctx.moveTo(x + radius * 0.4, y - bodyHeight * 0.1);
-    ctx.lineTo(x + radius * 0.7, y + bodyHeight * 0.1);
-    ctx.stroke();
-    
-    // 다리
-    ctx.beginPath();
-    ctx.moveTo(x - radius * 0.2, y + bodyHeight * 0.45);
-    ctx.lineTo(x - radius * 0.3, y + bodyHeight * 0.8);
-    ctx.moveTo(x + radius * 0.2, y + bodyHeight * 0.45);
-    ctx.lineTo(x + radius * 0.3, y + bodyHeight * 0.8);
-    ctx.stroke();
-  }
-  
-  // 인원수 아이템 (작은 사람)
-  function drawPerson(x, y, radius, value) {
-    const scale = 0.8;
-    const headRadius = radius * 0.35 * scale;
-    const bodyHeight = radius * 1.0 * scale;
-    
-    // 배경 원
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(100, 200, 255, 0.3)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(100, 200, 255, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // 머리
-    ctx.beginPath();
-    ctx.arc(x, y - bodyHeight * 0.2, headRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFD4A3';
-    ctx.fill();
-    
-    // 몸통
-    ctx.fillStyle = '#4A9EFF';
-    ctx.fillRect(x - headRadius * 0.8, y, headRadius * 1.6, bodyHeight * 0.5);
-    
-    // +숫자 표시
-    ctx.fillStyle = '#FFF';
-    ctx.font = 'bold 14px system-ui';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`+${value}`, x, y + radius + 10);
-    ctx.textAlign = 'start';
-    ctx.textBaseline = 'alphabetic';
-  }
-  
-  // 일반 좀비 (녹색)
-  function drawNormalZombie(x, y, radius) {
-    const headRadius = radius * 0.5;
-    const bodyHeight = radius * 1.3;
-    
-    // 몸통 (찢어진 옷)
-    ctx.fillStyle = '#8B7355';
-    ctx.fillRect(x - radius * 0.45, y - bodyHeight * 0.1, radius * 0.9, bodyHeight * 0.7);
-    
-    // 머리 (좀비 피부색)
-    ctx.beginPath();
-    ctx.arc(x, y - bodyHeight * 0.35, headRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#7A9B7E';
-    ctx.fill();
-    ctx.strokeStyle = '#556B58';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // 흉측한 눈 (붉은 눈)
-    ctx.fillStyle = '#FF4444';
-    ctx.beginPath();
-    ctx.arc(x - headRadius * 0.3, y - bodyHeight * 0.4, headRadius * 0.2, 0, Math.PI * 2);
-    ctx.arc(x + headRadius * 0.3, y - bodyHeight * 0.4, headRadius * 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // 입 (찢어진 입)
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(x - headRadius * 0.3, y - bodyHeight * 0.2);
-    ctx.quadraticCurveTo(x, y - bodyHeight * 0.15, x + headRadius * 0.3, y - bodyHeight * 0.2);
-    ctx.stroke();
-    
-    // 팔 (축 늘어진)
-    ctx.strokeStyle = '#7A9B7E';
-    ctx.lineWidth = radius * 0.25;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x - radius * 0.45, y - bodyHeight * 0.05);
-    ctx.lineTo(x - radius * 0.6, y + bodyHeight * 0.3);
-    ctx.moveTo(x + radius * 0.45, y - bodyHeight * 0.05);
-    ctx.lineTo(x + radius * 0.6, y + bodyHeight * 0.3);
-    ctx.stroke();
-  }
-  
-  // 강한 좀비 (빨간색, 더 무섭게)
-  function drawStrongZombie(x, y, radius) {
-    const headRadius = radius * 0.55;
-    const bodyHeight = radius * 1.4;
-    
-    // 어두운 오라
-    const gradient = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius * 1.8);
-    gradient.addColorStop(0, 'rgba(150, 0, 0, 0.4)');
-    gradient.addColorStop(1, 'rgba(150, 0, 0, 0)');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(x, y, radius * 1.8, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // 큰 몸통 (근육질)
-    ctx.fillStyle = '#4A0E0E';
-    ctx.fillRect(x - radius * 0.5, y - bodyHeight * 0.1, radius, bodyHeight * 0.8);
-    
-    // 상처/근육 디테일
-    ctx.strokeStyle = '#8B0000';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(x - radius * 0.3, y);
-    ctx.lineTo(x + radius * 0.3, y);
-    ctx.moveTo(x - radius * 0.2, y + bodyHeight * 0.2);
-    ctx.lineTo(x + radius * 0.2, y + bodyHeight * 0.2);
-    ctx.stroke();
-    
-    // 머리 (변형된 형태)
-    ctx.beginPath();
-    ctx.ellipse(x, y - bodyHeight * 0.4, headRadius * 0.9, headRadius * 1.1, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#8B3A3A';
-    ctx.fill();
-    ctx.strokeStyle = '#660000';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    
-    // 불타는 듯한 눈
-    const eyeGlow = ctx.createRadialGradient(x - headRadius * 0.3, y - bodyHeight * 0.45, 0, x - headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.3);
-    eyeGlow.addColorStop(0, '#FFFF00');
-    eyeGlow.addColorStop(0.5, '#FF4400');
-    eyeGlow.addColorStop(1, '#880000');
-    ctx.fillStyle = eyeGlow;
-    ctx.beginPath();
-    ctx.arc(x - headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.25, 0, Math.PI * 2);
-    ctx.fill();
-    
-    const eyeGlow2 = ctx.createRadialGradient(x + headRadius * 0.3, y - bodyHeight * 0.45, 0, x + headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.3);
-    eyeGlow2.addColorStop(0, '#FFFF00');
-    eyeGlow2.addColorStop(0.5, '#FF4400');
-    eyeGlow2.addColorStop(1, '#880000');
-    ctx.fillStyle = eyeGlow2;
-    ctx.beginPath();
-    ctx.arc(x + headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.25, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // 이빨/송곳니
-    ctx.fillStyle = '#FFF';
-    ctx.beginPath();
-    ctx.moveTo(x - headRadius * 0.15, y - bodyHeight * 0.25);
-    ctx.lineTo(x - headRadius * 0.1, y - bodyHeight * 0.15);
-    ctx.lineTo(x - headRadius * 0.05, y - bodyHeight * 0.25);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(x + headRadius * 0.05, y - bodyHeight * 0.25);
-    ctx.lineTo(x + headRadius * 0.1, y - bodyHeight * 0.15);
-    ctx.lineTo(x + headRadius * 0.15, y - bodyHeight * 0.25);
-    ctx.fill();
-    
-    // 강력한 팔
-    ctx.strokeStyle = '#8B3A3A';
-    ctx.lineWidth = radius * 0.35;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x - radius * 0.5, y - bodyHeight * 0.05);
-    ctx.lineTo(x - radius * 0.8, y + bodyHeight * 0.2);
-    ctx.moveTo(x + radius * 0.5, y - bodyHeight * 0.05);
-    ctx.lineTo(x + radius * 0.8, y + bodyHeight * 0.2);
-    ctx.stroke();
-    
-    // 발톱
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(x - radius * 0.8, y + bodyHeight * 0.2);
-    ctx.lineTo(x - radius * 0.9, y + bodyHeight * 0.3);
-    ctx.moveTo(x + radius * 0.8, y + bodyHeight * 0.2);
-    ctx.lineTo(x + radius * 0.9, y + bodyHeight * 0.3);
-    ctx.stroke();
-  }
-
-  // ========== Game State ==========
-  const game = {
-    running: false,
-    startTime: 0,
-    lastTime: 0,
-    time: 0,
-    score: 0,
-    hp: 100,
-    people: 1,
-    zombieLevel: 1, // 현재 좀비 레벨 (1~20)
-    playerId: '',
-    gameOverHandled: false,
-    
-    // Difficulty scaling
-    zombieInterval: 600,
-    peopleInterval: 850,
-    strongZombieInterval: 3200,
-    minZombieInterval: 180,
-    
-    // Spawn timers
-    zombieTimer: 0,
-    peopleTimer: 0,
-    strongTimer: 0,
-    fireTimer: 0,
-    fireInterval: 150,
-    
-    // Entities
-    zombies: [],
-    peopleDrops: [],
-    bullets: [],
-    
-    // Input
-    moveDir: 0, // -1: left, 0: none, 1: right
-  };
-
-  // 좀비 레벨별 스탯 계산 함수
-  function getZombieStats(level, isStrong) {
-    // 레벨은 1~20 사이
-    const clampedLevel = Math.min(20, Math.max(1, level));
-    
-    if (isStrong) {
-      // 강한 좀비: 레벨당 HP 대폭 증가
-      return {
-        hp: 10 + (clampedLevel - 1) * 5, // 10 ~ 105
-        speed: 70 + (clampedLevel - 1) * 2, // 70 ~ 108
-        radius: 22 + Math.floor((clampedLevel - 1) / 4), // 22 ~ 26
-        damage: 15 + Math.floor((clampedLevel - 1) * 2), // 15 ~ 53
-        score: 50 + clampedLevel * 10, // 60 ~ 250
-      };
-    } else {
-      // 일반 좀비: 레벨당 HP 증가
-      return {
-        hp: 3 + (clampedLevel - 1) * 2, // 3 ~ 41
-        speed: 140 + (clampedLevel - 1) * 3, // 140 ~ 197
-        radius: 16 + Math.floor((clampedLevel - 1) / 5), // 16 ~ 19
-        damage: 6 + Math.floor((clampedLevel - 1) * 1.5), // 6 ~ 34
-        score: 15 + clampedLevel * 2, // 17 ~ 55
-      };
-    }
-  }
-
-  // 인원수에 따라 좀비 레벨 계산
-  function calculateZombieLevel() {
-    // 인원수 5명당 레벨 1 상승, 최대 20레벨
-    return Math.min(20, Math.floor(game.people / 5) + 1);
-  }
-
-  const player = {
-    x: W() / 2,
-    y: PLAYER_Y,
-    radius: 18,
-    speed: 350,
-  };
-
-  // ========== Utility Functions ==========
-  function clamp(val, min, max) {
-    return Math.max(min, Math.min(max, val));
-  }
-
-  function random(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  function distance(x1, y1, x2, y2) {
-    const dx = x1 - x2;
-    const dy = y1 - y2;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  // ========== Entity Spawners ==========
-  function spawnZombie(strong = false) {
-    const x = LANE_RIGHT_X() + random(-W() * 0.25, W() * 0.25); // 70% 영역에 넓게 분포
-    const stats = getZombieStats(game.zombieLevel, strong);
-    
-    game.zombies.push({
-      x,
-      y: -30,
-      radius: stats.radius,
-      hp: stats.hp,
-      maxHp: stats.hp,
-      strong,
-      speed: stats.speed,
-      damage: stats.damage,
-      scoreValue: stats.score,
-      level: game.zombieLevel,
-    });
-  }
-
-  function spawnPeople() {
-    const x = LANE_LEFT_X() + random(-W() * 0.1, W() * 0.1); // 30% 영역에 집중
-    const speed = random(100, 140);
-    const value = Math.random() < 0.12 ? 3 : 1;
-    
-    game.peopleDrops.push({
-      x,
-      y: -30,
-      radius: 16,
-      speed,
-      value,
-    });
-  }
-
-  function shoot() {
-    // Only shoot when on right side
-    if (player.x < MID_X()) return;
-
-    const bulletCount = Math.min(1 + Math.floor(game.people / 3), 7);
-    const spread = Math.min(20, 8 + bulletCount * 2);
-    const damage = 1 + Math.floor(game.people / 10);
-
-    for (let i = 0; i < bulletCount; i++) {
-      const offset = (i - (bulletCount - 1) / 2) * spread;
-      game.bullets.push({
-        x: player.x + offset,
-        y: player.y() - player.radius - 5,
-        radius: 5,
-        speed: -580,
-        damage,
+        rankingList.appendChild(li);
       });
     }
-  }
 
-  // ========== Input Handling ==========
-  const btnLeft = document.getElementById('btnLeft');
-  const btnRight = document.getElementById('btnRight');
+    // ========== Character Drawing Functions ==========
 
-  function setupControls(btn, dir) {
-    const start = (e) => {
-      e.preventDefault();
-      game.moveDir = dir;
+    // 플레이어 캐릭터 그리기 (사람 형태)
+    function drawPlayer(x, y, radius, glowIntensity = 0) {
+      const headRadius = radius * 0.4;
+      const bodyHeight = radius * 1.2;
+
+      // Glow effect
+      if (glowIntensity > 0) {
+        const glowSize = radius + glowIntensity;
+        const gradient = ctx.createRadialGradient(x, y, radius, x, y, glowSize);
+        gradient.addColorStop(0, 'rgba(100, 180, 255, 0)');
+        gradient.addColorStop(1, 'rgba(100, 180, 255, 0.2)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, glowSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 머리
+      ctx.beginPath();
+      ctx.arc(x, y - bodyHeight * 0.3, headRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFD4A3';
+      ctx.fill();
+      ctx.strokeStyle = '#CC8866';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 눈
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(x - headRadius * 0.3, y - bodyHeight * 0.35, headRadius * 0.15, 0, Math.PI * 2);
+      ctx.arc(x + headRadius * 0.3, y - bodyHeight * 0.35, headRadius * 0.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 몸통
+      ctx.beginPath();
+      ctx.fillStyle = '#4A9EFF';
+      ctx.fillRect(x - radius * 0.4, y - bodyHeight * 0.15, radius * 0.8, bodyHeight * 0.6);
+      ctx.strokeStyle = '#2E7FD9';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - radius * 0.4, y - bodyHeight * 0.15, radius * 0.8, bodyHeight * 0.6);
+
+      // 팔
+      ctx.strokeStyle = '#4A9EFF';
+      ctx.lineWidth = radius * 0.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - radius * 0.4, y - bodyHeight * 0.1);
+      ctx.lineTo(x - radius * 0.7, y + bodyHeight * 0.1);
+      ctx.moveTo(x + radius * 0.4, y - bodyHeight * 0.1);
+      ctx.lineTo(x + radius * 0.7, y + bodyHeight * 0.1);
+      ctx.stroke();
+
+      // 다리
+      ctx.beginPath();
+      ctx.moveTo(x - radius * 0.2, y + bodyHeight * 0.45);
+      ctx.lineTo(x - radius * 0.3, y + bodyHeight * 0.8);
+      ctx.moveTo(x + radius * 0.2, y + bodyHeight * 0.45);
+      ctx.lineTo(x + radius * 0.3, y + bodyHeight * 0.8);
+      ctx.stroke();
+    }
+
+    // 인원수 아이템 (작은 사람)
+    function drawPerson(x, y, radius, value) {
+      const scale = 0.8;
+      const headRadius = radius * 0.35 * scale;
+      const bodyHeight = radius * 1.0 * scale;
+
+      // 배경 원
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(100, 200, 255, 0.3)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(100, 200, 255, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 머리
+      ctx.beginPath();
+      ctx.arc(x, y - bodyHeight * 0.2, headRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFD4A3';
+      ctx.fill();
+
+      // 몸통
+      ctx.fillStyle = '#4A9EFF';
+      ctx.fillRect(x - headRadius * 0.8, y, headRadius * 1.6, bodyHeight * 0.5);
+
+      // +숫자 표시
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`+${value}`, x, y + radius + 10);
+      ctx.textAlign = 'start';
+      ctx.textBaseline = 'alphabetic';
+    }
+
+    // 일반 좀비 (녹색)
+    function drawNormalZombie(x, y, radius) {
+      const headRadius = radius * 0.5;
+      const bodyHeight = radius * 1.3;
+
+      // 몸통 (찢어진 옷)
+      ctx.fillStyle = '#8B7355';
+      ctx.fillRect(x - radius * 0.45, y - bodyHeight * 0.1, radius * 0.9, bodyHeight * 0.7);
+
+      // 머리 (좀비 피부색)
+      ctx.beginPath();
+      ctx.arc(x, y - bodyHeight * 0.35, headRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#7A9B7E';
+      ctx.fill();
+      ctx.strokeStyle = '#556B58';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 흉측한 눈 (붉은 눈)
+      ctx.fillStyle = '#FF4444';
+      ctx.beginPath();
+      ctx.arc(x - headRadius * 0.3, y - bodyHeight * 0.4, headRadius * 0.2, 0, Math.PI * 2);
+      ctx.arc(x + headRadius * 0.3, y - bodyHeight * 0.4, headRadius * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 입 (찢어진 입)
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - headRadius * 0.3, y - bodyHeight * 0.2);
+      ctx.quadraticCurveTo(x, y - bodyHeight * 0.15, x + headRadius * 0.3, y - bodyHeight * 0.2);
+      ctx.stroke();
+
+      // 팔 (축 늘어진)
+      ctx.strokeStyle = '#7A9B7E';
+      ctx.lineWidth = radius * 0.25;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - radius * 0.45, y - bodyHeight * 0.05);
+      ctx.lineTo(x - radius * 0.6, y + bodyHeight * 0.3);
+      ctx.moveTo(x + radius * 0.45, y - bodyHeight * 0.05);
+      ctx.lineTo(x + radius * 0.6, y + bodyHeight * 0.3);
+      ctx.stroke();
+    }
+
+    // 강한 좀비 (빨간색, 더 무섭게)
+    function drawStrongZombie(x, y, radius) {
+      const headRadius = radius * 0.55;
+      const bodyHeight = radius * 1.4;
+
+      // 어두운 오라
+      const gradient = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius * 1.8);
+      gradient.addColorStop(0, 'rgba(150, 0, 0, 0.4)');
+      gradient.addColorStop(1, 'rgba(150, 0, 0, 0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 큰 몸통 (근육질)
+      ctx.fillStyle = '#4A0E0E';
+      ctx.fillRect(x - radius * 0.5, y - bodyHeight * 0.1, radius, bodyHeight * 0.8);
+
+      // 상처/근육 디테일
+      ctx.strokeStyle = '#8B0000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - radius * 0.3, y);
+      ctx.lineTo(x + radius * 0.3, y);
+      ctx.moveTo(x - radius * 0.2, y + bodyHeight * 0.2);
+      ctx.lineTo(x + radius * 0.2, y + bodyHeight * 0.2);
+      ctx.stroke();
+
+      // 머리 (변형된 형태)
+      ctx.beginPath();
+      ctx.ellipse(x, y - bodyHeight * 0.4, headRadius * 0.9, headRadius * 1.1, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#8B3A3A';
+      ctx.fill();
+      ctx.strokeStyle = '#660000';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 불타는 듯한 눈
+      const eyeGlow = ctx.createRadialGradient(x - headRadius * 0.3, y - bodyHeight * 0.45, 0, x - headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.3);
+      eyeGlow.addColorStop(0, '#FFFF00');
+      eyeGlow.addColorStop(0.5, '#FF4400');
+      eyeGlow.addColorStop(1, '#880000');
+      ctx.fillStyle = eyeGlow;
+      ctx.beginPath();
+      ctx.arc(x - headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+
+      const eyeGlow2 = ctx.createRadialGradient(x + headRadius * 0.3, y - bodyHeight * 0.45, 0, x + headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.3);
+      eyeGlow2.addColorStop(0, '#FFFF00');
+      eyeGlow2.addColorStop(0.5, '#FF4400');
+      eyeGlow2.addColorStop(1, '#880000');
+      ctx.fillStyle = eyeGlow2;
+      ctx.beginPath();
+      ctx.arc(x + headRadius * 0.3, y - bodyHeight * 0.45, headRadius * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 이빨/송곳니
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath();
+      ctx.moveTo(x - headRadius * 0.15, y - bodyHeight * 0.25);
+      ctx.lineTo(x - headRadius * 0.1, y - bodyHeight * 0.15);
+      ctx.lineTo(x - headRadius * 0.05, y - bodyHeight * 0.25);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + headRadius * 0.05, y - bodyHeight * 0.25);
+      ctx.lineTo(x + headRadius * 0.1, y - bodyHeight * 0.15);
+      ctx.lineTo(x + headRadius * 0.15, y - bodyHeight * 0.25);
+      ctx.fill();
+
+      // 강력한 팔
+      ctx.strokeStyle = '#8B3A3A';
+      ctx.lineWidth = radius * 0.35;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - radius * 0.5, y - bodyHeight * 0.05);
+      ctx.lineTo(x - radius * 0.8, y + bodyHeight * 0.2);
+      ctx.moveTo(x + radius * 0.5, y - bodyHeight * 0.05);
+      ctx.lineTo(x + radius * 0.8, y + bodyHeight * 0.2);
+      ctx.stroke();
+
+      // 발톱
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - radius * 0.8, y + bodyHeight * 0.2);
+      ctx.lineTo(x - radius * 0.9, y + bodyHeight * 0.3);
+      ctx.moveTo(x + radius * 0.8, y + bodyHeight * 0.2);
+      ctx.lineTo(x + radius * 0.9, y + bodyHeight * 0.3);
+      ctx.stroke();
+    }
+
+    // ========== Game State ==========
+    const game = {
+      running: false,
+      startTime: 0,
+      lastTime: 0,
+      time: 0,
+      score: 0,
+      hp: 100,
+      people: 1,
+      zombieLevel: 1, // 현재 좀비 레벨 (1~20)
+      playerId: '',
+      gameOverHandled: false,
+
+      // Difficulty scaling
+      zombieInterval: 600,
+      peopleInterval: 850,
+      strongZombieInterval: 3200,
+      minZombieInterval: 180,
+
+      // Spawn timers
+      zombieTimer: 0,
+      peopleTimer: 0,
+      strongTimer: 0,
+      fireTimer: 0,
+      fireInterval: 150,
+
+      // Entities
+      zombies: [],
+      peopleDrops: [],
+      bullets: [],
+
+      // Input
+      moveDir: 0, // -1: left, 0: none, 1: right
     };
-    
-    const end = (e) => {
-      e.preventDefault();
-      if (game.moveDir === dir) game.moveDir = 0;
+
+    // 좀비 레벨별 스탯 계산 함수
+    function getZombieStats(level, isStrong) {
+      // 레벨은 1~20 사이
+      const clampedLevel = Math.min(20, Math.max(1, level));
+
+      if (isStrong) {
+        // 강한 좀비: 레벨당 HP 대폭 증가
+        return {
+          hp: 10 + (clampedLevel - 1) * 5, // 10 ~ 105
+          speed: 70 + (clampedLevel - 1) * 2, // 70 ~ 108
+          radius: 22 + Math.floor((clampedLevel - 1) / 4), // 22 ~ 26
+          damage: 15 + Math.floor((clampedLevel - 1) * 2), // 15 ~ 53
+          score: 50 + clampedLevel * 10, // 60 ~ 250
+        };
+      } else {
+        // 일반 좀비: 레벨당 HP 증가
+        return {
+          hp: 3 + (clampedLevel - 1) * 2, // 3 ~ 41
+          speed: 140 + (clampedLevel - 1) * 3, // 140 ~ 197
+          radius: 16 + Math.floor((clampedLevel - 1) / 5), // 16 ~ 19
+          damage: 6 + Math.floor((clampedLevel - 1) * 1.5), // 6 ~ 34
+          score: 15 + clampedLevel * 2, // 17 ~ 55
+        };
+      }
+    }
+
+    // 인원수에 따라 좀비 레벨 계산
+    function calculateZombieLevel() {
+      // 인원수 5명당 레벨 1 상승, 최대 20레벨
+      return Math.min(20, Math.floor(game.people / 5) + 1);
+    }
+
+    const player = {
+      x: W() / 2,
+      y: PLAYER_Y,
+      radius: 18,
+      speed: 350,
     };
 
-    btn.addEventListener('touchstart', start, { passive: false });
-    btn.addEventListener('touchend', end, { passive: false });
-    btn.addEventListener('touchcancel', end, { passive: false });
-    
-    // Desktop fallback
-    btn.addEventListener('mousedown', start);
-    window.addEventListener('mouseup', end);
-  }
+    // ========== Utility Functions ==========
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
 
-  setupControls(btnLeft, -1);
-  setupControls(btnRight, 1);
+    function random(min, max) {
+      return min + Math.random() * (max - min);
+    }
 
-  // Keyboard controls
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-      e.preventDefault();
-      game.moveDir = -1;
-    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-      e.preventDefault();
-      game.moveDir = 1;
-    } else if (e.key === ' ' || e.key === 'Enter') {
-      if (!game.running && !rankingModal.classList.contains('show')) {
+    function distance(x1, y1, x2, y2) {
+      const dx = x1 - x2;
+      const dy = y1 - y2;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // ========== Entity Spawners ==========
+    function spawnZombie(strong = false) {
+      const x = LANE_RIGHT_X() + random(-W() * 0.25, W() * 0.25); // 70% 영역에 넓게 분포
+      const stats = getZombieStats(game.zombieLevel, strong);
+
+      game.zombies.push({
+        x,
+        y: -30,
+        radius: stats.radius,
+        hp: stats.hp,
+        maxHp: stats.hp,
+        strong,
+        speed: stats.speed,
+        damage: stats.damage,
+        scoreValue: stats.score,
+        level: game.zombieLevel,
+      });
+    }
+
+    function spawnPeople() {
+      const x = LANE_LEFT_X() + random(-W() * 0.1, W() * 0.1); // 30% 영역에 집중
+      const speed = random(100, 140);
+      const value = Math.random() < 0.12 ? 3 : 1;
+
+      game.peopleDrops.push({
+        x,
+        y: -30,
+        radius: 16,
+        speed,
+        value,
+      });
+    }
+
+    function shoot() {
+      // Only shoot when on right side
+      if (player.x < MID_X()) return;
+
+      const bulletCount = Math.min(1 + Math.floor(game.people / 3), 7);
+      const spread = Math.min(20, 8 + bulletCount * 2);
+      const damage = 1 + Math.floor(game.people / 10);
+
+      for (let i = 0; i < bulletCount; i++) {
+        const offset = (i - (bulletCount - 1) / 2) * spread;
+        game.bullets.push({
+          x: player.x + offset,
+          y: player.y() - player.radius - 5,
+          radius: 5,
+          speed: -580,
+          damage,
+        });
+      }
+    }
+
+    // ========== Input Handling ==========
+    const btnLeft = document.getElementById('btnLeft');
+    const btnRight = document.getElementById('btnRight');
+
+    function setupControls(btn, dir) {
+      const start = (e) => {
         e.preventDefault();
-        reset();
+        game.moveDir = dir;
+      };
+
+      const end = (e) => {
+        e.preventDefault();
+        if (game.moveDir === dir) game.moveDir = 0;
+      };
+
+      btn.addEventListener('touchstart', start, { passive: false });
+      btn.addEventListener('touchend', end, { passive: false });
+      btn.addEventListener('touchcancel', end, { passive: false });
+
+      // Desktop fallback
+      btn.addEventListener('mousedown', start);
+      window.addEventListener('mouseup', end);
+    }
+
+    setupControls(btnLeft, -1);
+    setupControls(btnRight, 1);
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        game.moveDir = -1;
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        game.moveDir = 1;
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        if (!game.running && !rankingModal.classList.contains('show')) {
+          e.preventDefault();
+          reset();
+        }
       }
-    }
-  });
+    });
 
-  window.addEventListener('keyup', (e) => {
-    if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && game.moveDir === -1) {
-      game.moveDir = 0;
-    } else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && game.moveDir === 1) {
-      game.moveDir = 0;
-    }
-  });
-
-  // Tap to restart when game over
-  canvas.addEventListener('click', () => {
-    if (!game.running && !rankingModal.classList.contains('show')) reset();
-  });
-
-  // ========== Game Loop ==========
-  function update(dt) {
-    // Update zombie level based on people count
-    game.zombieLevel = calculateZombieLevel();
-    
-    // Update time and score
-    game.time = Math.floor((performance.now() - game.startTime) / 1000);
-    game.score = Math.floor(game.time * 10 + game.people * 5);
-
-    // Difficulty scaling
-    game.zombieInterval = Math.max(game.minZombieInterval, game.zombieInterval - dt * 5);
-    game.strongZombieInterval = Math.max(1000, game.strongZombieInterval - dt * 1.5);
-
-    // Move player
-    player.x += game.moveDir * player.speed * dt;
-    player.x = clamp(player.x, 30, W() - 30);
-    player.y = PLAYER_Y;
-
-    // Update timers
-    const dtMs = dt * 1000;
-    game.zombieTimer += dtMs;
-    game.peopleTimer += dtMs;
-    game.strongTimer += dtMs;
-    game.fireTimer += dtMs;
-
-    // Spawn entities
-    if (game.zombieTimer >= game.zombieInterval) {
-      game.zombieTimer = 0;
-      spawnZombie(false);
-    }
-
-    if (game.strongTimer >= game.strongZombieInterval) {
-      game.strongTimer = 0;
-      spawnZombie(true);
-    }
-
-    if (game.peopleTimer >= game.peopleInterval) {
-      game.peopleTimer = 0;
-      spawnPeople();
-    }
-
-    // Auto shoot
-    if (game.fireTimer >= game.fireInterval) {
-      game.fireTimer = 0;
-      shoot();
-    }
-
-    // Update bullets
-    for (let i = game.bullets.length - 1; i >= 0; i--) {
-      const bullet = game.bullets[i];
-      bullet.y += bullet.speed * dt;
-      
-      if (bullet.y < -50) {
-        game.bullets.splice(i, 1);
+    window.addEventListener('keyup', (e) => {
+      if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && game.moveDir === -1) {
+        game.moveDir = 0;
+      } else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && game.moveDir === 1) {
+        game.moveDir = 0;
       }
-    }
+    });
 
-    // Update people drops (collect on touch)
-    for (let i = game.peopleDrops.length - 1; i >= 0; i--) {
-      const drop = game.peopleDrops[i];
-      drop.y += drop.speed * dt;
+    // Tap to restart when game over
+    canvas.addEventListener('click', () => {
+      if (!game.running && !rankingModal.classList.contains('show')) reset();
+    });
 
-      // Collision with player
-      if (distance(player.x, player.y(), drop.x, drop.y) < player.radius + drop.radius + 10) {
-        game.people += drop.value;
-        game.peopleDrops.splice(i, 1);
-        continue;
+    // ========== Game Loop ==========
+    function update(dt) {
+      // Update zombie level based on people count
+      game.zombieLevel = calculateZombieLevel();
+
+      // Update time and score
+      game.time = Math.floor((performance.now() - game.startTime) / 1000);
+      game.score = Math.floor(game.time * 10 + game.people * 5);
+
+      // Difficulty scaling
+      game.zombieInterval = Math.max(game.minZombieInterval, game.zombieInterval - dt * 5);
+      game.strongZombieInterval = Math.max(1000, game.strongZombieInterval - dt * 1.5);
+
+      // Move player
+      player.x += game.moveDir * player.speed * dt;
+      player.x = clamp(player.x, 30, W() - 30);
+      player.y = PLAYER_Y;
+
+      // Update timers
+      const dtMs = dt * 1000;
+      game.zombieTimer += dtMs;
+      game.peopleTimer += dtMs;
+      game.strongTimer += dtMs;
+      game.fireTimer += dtMs;
+
+      // Spawn entities
+      if (game.zombieTimer >= game.zombieInterval) {
+        game.zombieTimer = 0;
+        spawnZombie(false);
       }
 
-      // Missed
-      if (drop.y > player.y() + 50) {
-        game.peopleDrops.splice(i, 1);
+      if (game.strongTimer >= game.strongZombieInterval) {
+        game.strongTimer = 0;
+        spawnZombie(true);
       }
-    }
 
-    // Update zombies & bullet collisions
-    for (let zi = game.zombies.length - 1; zi >= 0; zi--) {
-      const zombie = game.zombies[zi];
-      zombie.y += zombie.speed * dt;
+      if (game.peopleTimer >= game.peopleInterval) {
+        game.peopleTimer = 0;
+        spawnPeople();
+      }
 
-      // Check bullet hits
-      for (let bi = game.bullets.length - 1; bi >= 0; bi--) {
-        const bullet = game.bullets[bi];
-        
-        if (distance(zombie.x, zombie.y, bullet.x, bullet.y) < zombie.radius + bullet.radius) {
-          zombie.hp -= bullet.damage;
-          game.bullets.splice(bi, 1);
-          
-          if (zombie.hp <= 0) {
-            game.score += zombie.scoreValue;
-            game.zombies.splice(zi, 1);
-            break;
+      // Auto shoot
+      if (game.fireTimer >= game.fireInterval) {
+        game.fireTimer = 0;
+        shoot();
+      }
+
+      // Update bullets
+      for (let i = game.bullets.length - 1; i >= 0; i--) {
+        const bullet = game.bullets[i];
+        bullet.y += bullet.speed * dt;
+
+        if (bullet.y < -50) {
+          game.bullets.splice(i, 1);
+        }
+      }
+
+      // Update people drops (collect on touch)
+      for (let i = game.peopleDrops.length - 1; i >= 0; i--) {
+        const drop = game.peopleDrops[i];
+        drop.y += drop.speed * dt;
+
+        // Collision with player
+        if (distance(player.x, player.y(), drop.x, drop.y) < player.radius + drop.radius + 10) {
+          game.people += drop.value;
+          game.peopleDrops.splice(i, 1);
+          continue;
+        }
+
+        // Missed
+        if (drop.y > player.y() + 50) {
+          game.peopleDrops.splice(i, 1);
+        }
+      }
+
+      // Update zombies & bullet collisions
+      for (let zi = game.zombies.length - 1; zi >= 0; zi--) {
+        const zombie = game.zombies[zi];
+        zombie.y += zombie.speed * dt;
+
+        // Check bullet hits
+        for (let bi = game.bullets.length - 1; bi >= 0; bi--) {
+          const bullet = game.bullets[bi];
+
+          if (distance(zombie.x, zombie.y, bullet.x, bullet.y) < zombie.radius + bullet.radius) {
+            zombie.hp -= bullet.damage;
+            game.bullets.splice(bi, 1);
+
+            if (zombie.hp <= 0) {
+              game.score += zombie.scoreValue;
+              game.zombies.splice(zi, 1);
+              break;
+            }
+          }
+        }
+
+        // Check if zombie reached bottom
+        if (zi < game.zombies.length && zombie.y > player.y() + 50) {
+          game.hp -= zombie.damage; // 레벨별 데미지 적용
+          game.zombies.splice(zi, 1);
+        }
+      }
+
+      // Check game over
+      if (game.hp <= 0) {
+        game.hp = 0;
+        game.running = false;
+        if (!game.gameOverHandled) {
+          game.gameOverHandled = true;
+          if (game.playerId) {
+            const entry = {
+              id: game.playerId,
+              score: game.score,
+              time: game.time,
+              people: game.people,
+            };
+            const list = upsertRanking(entry);
+            rankingDesc.textContent = `ID: ${game.playerId} • Score: ${game.score}`;
+            renderRanking(list, game.playerId);
+            rankingModal.classList.add('show');
           }
         }
       }
 
-      // Check if zombie reached bottom
-      if (zi < game.zombies.length && zombie.y > player.y() + 50) {
-        game.hp -= zombie.damage; // 레벨별 데미지 적용
-        game.zombies.splice(zi, 1);
-      }
+      // Update HUD
+      updateHUD();
     }
 
-    // Check game over
-    if (game.hp <= 0) {
-      game.hp = 0;
-      game.running = false;
-      if (!game.gameOverHandled) {
-        game.gameOverHandled = true;
-        if (game.playerId) {
-          const entry = {
-            id: game.playerId,
-            score: game.score,
-            time: game.time,
-            people: game.people,
-          };
-          const list = upsertRanking(entry);
-          rankingDesc.textContent = `ID: ${game.playerId} • Score: ${game.score}`;
-          renderRanking(list, game.playerId);
-          rankingModal.classList.add('show');
-        }
-      }
-    }
+    function draw() {
+      const w = W();
+      const h = H();
 
-    // Update HUD
-    updateHUD();
-  }
+      // Clear canvas
+      ctx.clearRect(0, 0, w, h);
 
-  function draw() {
-    const w = W();
-    const h = H();
-
-    // Clear canvas
-    ctx.clearRect(0, 0, w, h);
-
-    // Draw lane divider
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([10, 10]);
-    ctx.beginPath();
-    ctx.moveTo(LANE_DIVIDER(), 0);
-    ctx.lineTo(LANE_DIVIDER(), h);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Draw lane labels
-    ctx.font = '700 13px system-ui';
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText('GROW', 16, h * 0.15);
-    ctx.fillText('FIGHT', LANE_DIVIDER() + 16, h * 0.15);
-
-    // Draw people drops
-    game.peopleDrops.forEach(drop => {
-      drawPerson(drop.x, drop.y, drop.radius, drop.value);
-    });
-
-    // Draw zombies
-    game.zombies.forEach(zombie => {
-      if (zombie.strong) {
-        drawStrongZombie(zombie.x, zombie.y, zombie.radius);
-      } else {
-        drawNormalZombie(zombie.x, zombie.y, zombie.radius);
-      }
-
-      // HP bar
-      const barW = zombie.radius * 2.4;
-      const barH = 5;
-      const hpRatio = zombie.hp / zombie.maxHp;
-      
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(zombie.x - barW / 2, zombie.y - zombie.radius - 18, barW, barH);
-      
-      ctx.fillStyle = zombie.strong ? 'rgba(255,50,50,0.95)' : 'rgba(100,255,100,0.9)';
-      ctx.fillRect(zombie.x - barW / 2, zombie.y - zombie.radius - 18, barW * hpRatio, barH);
-      
-      // Level indicator
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = 'bold 10px system-ui';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`Lv.${zombie.level}`, zombie.x, zombie.y - zombie.radius - 25);
-      ctx.textAlign = 'start';
-      ctx.textBaseline = 'alphabetic';
-    });
-
-    // Draw bullets
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.shadowColor = 'rgba(255,255,255,0.5)';
-    ctx.shadowBlur = 5;
-    game.bullets.forEach(bullet => {
+      // Draw lane divider
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([10, 10]);
       ctx.beginPath();
-      ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.shadowBlur = 0;
+      ctx.moveTo(LANE_DIVIDER(), 0);
+      ctx.lineTo(LANE_DIVIDER(), h);
+      ctx.stroke();
+      ctx.setLineDash([]);
 
-    // Draw player
-    const py = player.y();
-    const glowIntensity = Math.min(35, game.people * 1.8);
-    drawPlayer(player.x, py, player.radius, glowIntensity);
+      // Draw lane labels
+      ctx.font = '700 13px system-ui';
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fillText('GROW', 16, h * 0.15);
+      ctx.fillText('FIGHT', LANE_DIVIDER() + 16, h * 0.15);
 
-    // Bottom danger line
-    ctx.strokeStyle = 'rgba(255,80,80,0.15)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, py + 50);
-    ctx.lineTo(w, py + 50);
-    ctx.stroke();
+      // Draw people drops
+      game.peopleDrops.forEach(drop => {
+        drawPerson(drop.x, drop.y, drop.radius, drop.value);
+      });
 
-    // Game over overlay
-    if (!game.running) {
-      ctx.fillStyle = 'rgba(0,0,0,0.7)';
-      ctx.fillRect(0, 0, w, h);
+      // Draw zombies
+      game.zombies.forEach(zombie => {
+        if (zombie.strong) {
+          drawStrongZombie(zombie.x, zombie.y, zombie.radius);
+        } else {
+          drawNormalZombie(zombie.x, zombie.y, zombie.radius);
+        }
 
+        // HP bar
+        const barW = zombie.radius * 2.4;
+        const barH = 5;
+        const hpRatio = zombie.hp / zombie.maxHp;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(zombie.x - barW / 2, zombie.y - zombie.radius - 18, barW, barH);
+
+        ctx.fillStyle = zombie.strong ? 'rgba(255,50,50,0.95)' : 'rgba(100,255,100,0.9)';
+        ctx.fillRect(zombie.x - barW / 2, zombie.y - zombie.radius - 18, barW * hpRatio, barH);
+
+        // Level indicator
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = 'bold 10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`Lv.${zombie.level}`, zombie.x, zombie.y - zombie.radius - 25);
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'alphabetic';
+      });
+
+      // Draw bullets
       ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.textAlign = 'center';
-      ctx.font = '700 40px system-ui';
-      ctx.fillText('GAME OVER', w / 2, h * 0.4);
+      ctx.shadowColor = 'rgba(255,255,255,0.5)';
+      ctx.shadowBlur = 5;
+      game.bullets.forEach(bullet => {
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0;
 
-      ctx.font = '600 18px system-ui';
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.fillText(`TIME: ${game.time}s  •  PEOPLE: ${game.people}  •  SCORE: ${game.score}`, w / 2, h * 0.48);
+      // Draw player
+      const py = player.y();
+      const glowIntensity = Math.min(35, game.people * 1.8);
+      drawPlayer(player.x, py, player.radius, glowIntensity);
 
-      ctx.font = '600 15px system-ui';
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.fillText('Click or Press Space to restart', w / 2, h * 0.56);
+      // Bottom danger line
+      ctx.strokeStyle = 'rgba(255,80,80,0.15)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, py + 50);
+      ctx.lineTo(w, py + 50);
+      ctx.stroke();
 
-      ctx.textAlign = 'start';
+      // Game over overlay
+      if (!game.running) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.textAlign = 'center';
+        ctx.font = '700 40px system-ui';
+        ctx.fillText('GAME OVER', w / 2, h * 0.4);
+
+        ctx.font = '600 18px system-ui';
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.fillText(`TIME: ${game.time}s  •  PEOPLE: ${game.people}  •  SCORE: ${game.score}`, w / 2, h * 0.48);
+
+        ctx.font = '600 15px system-ui';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText('Click or Press Space to restart', w / 2, h * 0.56);
+
+        ctx.textAlign = 'start';
+      }
     }
-  }
 
-  function updateHUD() {
-    document.getElementById('hp').textContent = Math.max(0, game.hp);
-    document.getElementById('people').textContent = game.people;
-    document.getElementById('level').textContent = game.zombieLevel;
-    document.getElementById('score').textContent = game.score;
-  }
-
-  function reset() {
-    game.running = true;
-    game.startTime = performance.now();
-    game.lastTime = performance.now();
-    game.time = 0;
-    game.score = 0;
-    game.hp = 100;
-    game.people = 1;
-    game.zombieLevel = 1;
-    game.gameOverHandled = false;
-
-    game.zombieInterval = 600;
-    game.peopleInterval = 850;
-    game.strongZombieInterval = 3200;
-
-    game.zombieTimer = 0;
-    game.peopleTimer = 0;
-    game.strongTimer = 0;
-    game.fireTimer = 0;
-
-    game.zombies = [];
-    game.peopleDrops = [];
-    game.bullets = [];
-
-    player.x = W() * 0.15; // 왼쪽 영역에서 시작
-    game.moveDir = 0;
-
-    updateHUD();
-  }
-
-  function gameLoop(now) {
-    const dt = Math.min(0.05, (now - game.lastTime) / 1000);
-    game.lastTime = now;
-
-    if (game.running) {
-      update(dt);
+    function updateHUD() {
+      document.getElementById('hp').textContent = Math.max(0, game.hp);
+      document.getElementById('people').textContent = game.people;
+      document.getElementById('level').textContent = game.zombieLevel;
+      document.getElementById('score').textContent = game.score;
     }
-    
-    draw();
-    requestAnimationFrame(gameLoop);
-  }
 
-  function showIdModal() {
-    idModal.classList.add('show');
-    playerIdInput.value = localStorage.getItem(LAST_ID_KEY) || '';
-    playerIdInput.focus();
-  }
+    function reset() {
+      game.running = true;
+      game.startTime = performance.now();
+      game.lastTime = performance.now();
+      game.time = 0;
+      game.score = 0;
+      game.hp = 100;
+      game.people = 1;
+      game.zombieLevel = 1;
+      game.gameOverHandled = false;
 
-  function closeIdModal() {
-    idModal.classList.remove('show');
-  }
+      game.zombieInterval = 600;
+      game.peopleInterval = 850;
+      game.strongZombieInterval = 3200;
 
-  function showRankingModal() {
-    const list = loadRanking().sort((a, b) => b.score - a.score);
-    rankingDesc.textContent = '상위 10명의 기록입니다.';
-    renderRanking(list);
-    rankingModal.classList.add('show');
-  }
+      game.zombieTimer = 0;
+      game.peopleTimer = 0;
+      game.strongTimer = 0;
+      game.fireTimer = 0;
 
-  function closeRankingModal() {
-    rankingModal.classList.remove('show');
-  }
+      game.zombies = [];
+      game.peopleDrops = [];
+      game.bullets = [];
 
-  function startGameWithId() {
-    const rawId = playerIdInput.value.trim();
-    if (!rawId) {
+      player.x = W() * 0.15; // 왼쪽 영역에서 시작
+      game.moveDir = 0;
+
+      updateHUD();
+    }
+
+    function gameLoop(now) {
+      const dt = Math.min(0.05, (now - game.lastTime) / 1000);
+      game.lastTime = now;
+
+      if (game.running) {
+        update(dt);
+      }
+
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function showIdModal() {
+      idModal.classList.add('show');
+      playerIdInput.value = localStorage.getItem(LAST_ID_KEY) || '';
       playerIdInput.focus();
-      return;
     }
-    game.playerId = rawId.slice(0, 12);
-    localStorage.setItem(LAST_ID_KEY, game.playerId);
-    closeIdModal();
-    reset();
-  }
 
-  startBtn.addEventListener('click', startGameWithId);
-  playerIdInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      startGameWithId();
+    function closeIdModal() {
+      idModal.classList.remove('show');
     }
-  });
-  rankBtn.addEventListener('click', showRankingModal);
-  closeRankingBtn.addEventListener('click', closeRankingModal);
 
-  // ========== Start Game ==========
-  setTimeout(() => {
-    loading.classList.add('hide');
-    requestAnimationFrame(gameLoop);
-    showIdModal();
-  }, 500);
+    function showRankingModal() {
+      const list = loadRanking().sort((a, b) => b.score - a.score);
+      rankingDesc.textContent = '상위 10명의 기록입니다.';
+      renderRanking(list);
+      rankingModal.classList.add('show');
+    }
 
-})();
+    function closeRankingModal() {
+      rankingModal.classList.remove('show');
+    }
+
+    function startGameWithId() {
+      const rawId = playerIdInput.value.trim();
+      if (!rawId) {
+        playerIdInput.focus();
+        return;
+      }
+      game.playerId = rawId.slice(0, 12);
+      localStorage.setItem(LAST_ID_KEY, game.playerId);
+      closeIdModal();
+      reset();
+    }
+
+    startBtn.addEventListener('click', startGameWithId);
+    playerIdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        startGameWithId();
+      }
+    });
+    rankBtn.addEventListener('click', showRankingModal);
+    closeRankingBtn.addEventListener('click', closeRankingModal);
+
+    // ========== Start Game ==========
+    setTimeout(() => {
+      loading.classList.add('hide');
+      requestAnimationFrame(gameLoop);
+      showIdModal();
+    }, 500);
+
+  })();
 </script>
 </body>
 </html>
