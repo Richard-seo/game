@@ -73,6 +73,12 @@
       pointer-events: none;
       z-index: 100;
     }
+
+    .hud-actions {
+      pointer-events: auto;
+      display: flex;
+      align-items: stretch;
+    }
     
     .stat {
       background: rgba(0,0,0,0.6);
@@ -135,6 +141,116 @@
       opacity: 0;
       pointer-events: none;
     }
+
+    /* 모달 공통 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1200;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(420px, 90vw);
+      background: rgba(10, 14, 26, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 18px;
+      color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: 0.2px;
+    }
+
+    .modal-desc {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 12px;
+    }
+
+    .modal-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .modal-btn {
+      background: #3a9bff;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.1s ease;
+    }
+
+    .modal-btn:active {
+      transform: scale(0.98);
+      background: #2e7fd9;
+    }
+
+    .ranking-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .ranking-id {
+      font-weight: 700;
+      color: #cfe6ff;
+    }
+
+    .rank-btn {
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.95);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rank-btn:active {
+      transform: scale(0.98);
+    }
   </style>
 </head>
 <body>
@@ -159,6 +275,9 @@
       <div class="stat-label">Score</div>
       <div class="stat-value" id="score">0</div>
     </div>
+    <div class="hud-actions">
+      <button class="rank-btn" id="rankBtn">Ranking</button>
+    </div>
   </div>
 
   <div class="guide">
@@ -170,6 +289,28 @@
     <div class="btn" id="btnRight">RIGHT ▶</div>
   </div>
 
+  <div class="modal" id="idModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-title">플레이어 ID 입력</div>
+      <div class="modal-desc">랭킹은 ID 기준으로 저장됩니다.</div>
+      <div class="modal-row">
+        <input class="modal-input" id="playerIdInput" maxlength="12" placeholder="예: player01" />
+        <button class="modal-btn" id="startBtn">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="rankingModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-title">랭킹</div>
+      <div class="modal-desc" id="rankingDesc">상위 10명의 기록입니다.</div>
+      <ol class="ranking-list" id="rankingList"></ol>
+      <div class="modal-row" style="justify-content: flex-end; margin-top: 12px;">
+        <button class="modal-btn" id="closeRankingBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function() {
   'use strict';
@@ -178,6 +319,14 @@
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   const loading = document.getElementById('loading');
+  const idModal = document.getElementById('idModal');
+  const playerIdInput = document.getElementById('playerIdInput');
+  const startBtn = document.getElementById('startBtn');
+  const rankBtn = document.getElementById('rankBtn');
+  const rankingModal = document.getElementById('rankingModal');
+  const rankingList = document.getElementById('rankingList');
+  const rankingDesc = document.getElementById('rankingDesc');
+  const closeRankingBtn = document.getElementById('closeRankingBtn');
 
   function resizeCanvas() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -197,6 +346,56 @@
   const LANE_DIVIDER = () => W() * 0.3;   // 경계선
   const MID_X = () => W() * 0.3;          // 왼쪽/오른쪽 구분 기준
   const PLAYER_Y = () => H() - Math.max(100, H() * 0.18) - 20;
+  const RANKING_KEY = 'dualfront_ranking_v1';
+  const LAST_ID_KEY = 'dualfront_last_id_v1';
+
+  function loadRanking() {
+    try {
+      const raw = localStorage.getItem(RANKING_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function saveRanking(list) {
+    localStorage.setItem(RANKING_KEY, JSON.stringify(list));
+  }
+
+  function upsertRanking(entry) {
+    const list = loadRanking();
+    const idx = list.findIndex(item => item.id === entry.id);
+    if (idx >= 0) {
+      if (entry.score > list[idx].score) {
+        list[idx] = entry;
+      }
+    } else {
+      list.push(entry);
+    }
+    list.sort((a, b) => b.score - a.score);
+    saveRanking(list);
+    return list;
+  }
+
+  function renderRanking(list, highlightId) {
+    rankingList.innerHTML = '';
+    if (!list.length) {
+      rankingList.innerHTML = '<li class="ranking-item">기록이 없습니다.</li>';
+      return;
+    }
+
+    list.slice(0, 10).forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'ranking-item';
+      const rank = `#${index + 1}`;
+      const label = highlightId && item.id === highlightId ? ' • 내 기록' : '';
+      li.innerHTML = `
+        <span>${rank} <span class="ranking-id">${item.id}</span>${label}</span>
+        <span>Score ${item.score} • ${item.time}s</span>
+      `;
+      rankingList.appendChild(li);
+    });
+  }
 
   // ========== Character Drawing Functions ==========
   
@@ -442,6 +641,8 @@
     hp: 100,
     people: 1,
     zombieLevel: 1, // 현재 좀비 레벨 (1~20)
+    playerId: '',
+    gameOverHandled: false,
     
     // Difficulty scaling
     zombieInterval: 600,
@@ -608,7 +809,7 @@
       e.preventDefault();
       game.moveDir = 1;
     } else if (e.key === ' ' || e.key === 'Enter') {
-      if (!game.running) {
+      if (!game.running && !rankingModal.classList.contains('show')) {
         e.preventDefault();
         reset();
       }
@@ -625,7 +826,7 @@
 
   // Tap to restart when game over
   canvas.addEventListener('click', () => {
-    if (!game.running) reset();
+    if (!game.running && !rankingModal.classList.contains('show')) reset();
   });
 
   // ========== Game Loop ==========
@@ -735,6 +936,21 @@
     if (game.hp <= 0) {
       game.hp = 0;
       game.running = false;
+      if (!game.gameOverHandled) {
+        game.gameOverHandled = true;
+        if (game.playerId) {
+          const entry = {
+            id: game.playerId,
+            score: game.score,
+            time: game.time,
+            people: game.people,
+          };
+          const list = upsertRanking(entry);
+          rankingDesc.textContent = `ID: ${game.playerId} • Score: ${game.score}`;
+          renderRanking(list, game.playerId);
+          rankingModal.classList.add('show');
+        }
+      }
     }
 
     // Update HUD
@@ -860,6 +1076,7 @@
     game.hp = 100;
     game.people = 1;
     game.zombieLevel = 1;
+    game.gameOverHandled = false;
 
     game.zombieInterval = 600;
     game.peopleInterval = 850;
@@ -892,11 +1109,54 @@
     requestAnimationFrame(gameLoop);
   }
 
+  function showIdModal() {
+    idModal.classList.add('show');
+    playerIdInput.value = localStorage.getItem(LAST_ID_KEY) || '';
+    playerIdInput.focus();
+  }
+
+  function closeIdModal() {
+    idModal.classList.remove('show');
+  }
+
+  function showRankingModal() {
+    const list = loadRanking().sort((a, b) => b.score - a.score);
+    rankingDesc.textContent = '상위 10명의 기록입니다.';
+    renderRanking(list);
+    rankingModal.classList.add('show');
+  }
+
+  function closeRankingModal() {
+    rankingModal.classList.remove('show');
+  }
+
+  function startGameWithId() {
+    const rawId = playerIdInput.value.trim();
+    if (!rawId) {
+      playerIdInput.focus();
+      return;
+    }
+    game.playerId = rawId.slice(0, 12);
+    localStorage.setItem(LAST_ID_KEY, game.playerId);
+    closeIdModal();
+    reset();
+  }
+
+  startBtn.addEventListener('click', startGameWithId);
+  playerIdInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      startGameWithId();
+    }
+  });
+  rankBtn.addEventListener('click', showRankingModal);
+  closeRankingBtn.addEventListener('click', closeRankingModal);
+
   // ========== Start Game ==========
   setTimeout(() => {
     loading.classList.add('hide');
-    reset();
     requestAnimationFrame(gameLoop);
+    showIdModal();
   }, 500);
 
 })();
